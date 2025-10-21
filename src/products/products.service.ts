@@ -1,28 +1,46 @@
-import { Injectable } from '@nestjs/common';
+// src/products/products.service.ts
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Product, ProductDocument } from './schemas/product.schema';
+import { Product } from './schemas/product.schema';
+import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { CreateCommentDto } from './dto/create-comment.dto';
 
 @Injectable()
 export class ProductsService {
+  constructor(@InjectModel(Product.name) private productModel: Model<Product>) {}
 
-    //Se instancia el constructos para crear los objetos producto
-    constructor(@InjectModel(Product.name) private productModel: Model<ProductDocument>) {}
+  async create(dto: CreateProductDto): Promise<Product> {
+    const created = new this.productModel(dto);
+    return created.save();
+  }
 
-    // Se crea metodo async (quiere decir que siempre devolvera una promesa 'promise' ya que el acceso a la B.D es asincrono) para obtener todos los productos
-    async productList(): Promise<Product[]> {
-        return this.productModel.find().exec();
-    }
+  async findAll(): Promise<Product[]> {
+    return this.productModel.find().exec();
+  }
 
-    // Se obtiene un producto por su ID
-    async specificProduct(id: string): Promise<Product>  {
-        const product = await this.productModel.findById(id).exec();
+  async findOne(id: string): Promise<Product> {
+    const product = await this.productModel.findById(id).exec();
+    if (!product) throw new NotFoundException('Producto no encontrado');
+    return product;
+  }
 
-        //Si el producto no es encontrado, para evitar retornar un NULL se crea este throw
-        if (!product) {
-            throw new Error('El producto con el id ${id} no fue encontrado');
-        }
-        return product;
-    }
+  async update(id: string, dto: UpdateProductDto): Promise<Product> {
+    const updated = await this.productModel.findByIdAndUpdate(id, dto, { new: true });
+    if (!updated) throw new NotFoundException('Producto no encontrado');
+    return updated;
+  }
+
+  async remove(id: string): Promise<void> {
+    const result = await this.productModel.findByIdAndDelete(id);
+    if (!result) throw new NotFoundException('Producto no encontrado');
+  }
+
+  async addComment(id: string, dto: CreateCommentDto): Promise<Product> {
+    const product = await this.productModel.findById(id);
+    if (!product) throw new NotFoundException('Producto no encontrado');
+    product.comments.push(dto);
+    return product.save();
+  }
 }
-
