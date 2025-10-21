@@ -1,28 +1,37 @@
-//Se importan decoradores y utilidades del parquete mongoose
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Document } from "mongoose";
+// src/products/schemas/product.schema.ts
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
 
-//Se crea un alias de TypeScript a la interseccion entre la clase Product y la clase Document (esta ultima proviene de mongoose)
-export type ProductDocument = Product & Document;
+@Schema({ timestamps: true })
+export class Comment {
+  @Prop({ required: true })
+  author: string;
 
-//este decorador marca la clase 'Product' como un Schema de mongoose 
-@Schema()
-export class Product 
-{
-    //se aplica decorador y Mongoose validara que ese campo exista al crear o guardar document
-    @Prop({ required: true })
-    name: string;
+  @Prop({ required: true })
+  message: string;
 
-    @Prop()
-    description: string;
-
-    //Mongoose validara que ese campo exista al crear o guardar document
-    @Prop({ required: true })
-    price: number;
-
-    @Prop()
-    stock: number;
+  @Prop({ default: Date.now })
+  date: Date;
 }
 
-// Se exporta la clase decorada Product en un Schema de Mongoose (ProductSchema)
+export const CommentSchema = SchemaFactory.createForClass(Comment);
+
+@Schema({ timestamps: true })
+export class Product extends Document {
+  @Prop({ required: true })
+  name: string;
+
+  @Prop({ required: true })
+  price: number;
+
+  @Prop()
+  description: string;
+
+  @Prop({ default: 0 })
+  stock: number;
+
+  @Prop({ type: [CommentSchema], default: [] })
+  comments: Comment[];
+}
+
 export const ProductSchema = SchemaFactory.createForClass(Product);
