@@ -1,22 +1,41 @@
-import { Controller, Get, Param } from '@nestjs/common'; 
+// src/products/products.controller.ts
+import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { Product } from './schemas/product.schema';
+import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { CreateCommentDto } from './dto/create-comment.dto';
 
 @Controller('products')
 export class ProductsController {
+  constructor(private readonly service: ProductsService) {}
 
-    //Se crea el constructor con un atributo privado y de solo lectura
-    constructor(private readonly productsService: ProductsService) {}
+  @Post()
+  create(@Body() dto: CreateProductDto) {
+    return this.service.create(dto);
+  }
 
-    @Get()
+  @Get()
+  findAll() {
+    return this.service.findAll();
+  }
 
-    //metodo que devuelve un array de productos
-    async GetAll(): Promise<Product[]> {
-        return this.productsService.productList();
-    }
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.service.findOne(id);
+  }
 
-    @Get(':id')
-    async getOne(@Param('id') id:string): Promise<Product> {
-        return this.productsService.specificProduct(id);
-    }
+  @Put(':id')
+  update(@Param('id') id: string, @Body() dto: UpdateProductDto) {
+    return this.service.update(id, dto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.service.remove(id);
+  }
+
+  @Post(':id/comments')
+  addComment(@Param('id') id: string, @Body() dto: CreateCommentDto) {
+    return this.service.addComment(id, dto);
+  }
 }
