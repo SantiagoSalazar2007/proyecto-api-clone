@@ -1,23 +1,25 @@
-// src/products/schemas/product.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
+
+export type ProductDocument = Product & Document;
 
 @Schema({ timestamps: true })
 export class Comment {
-  @Prop({ required: true })
-  author: string;
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  userId: Types.ObjectId;
 
   @Prop({ required: true })
-  message: string;
+  username: string;
 
-  @Prop({ default: Date.now })
-  date: Date;
+  @Prop({ required: true })
+  content: string;
+
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment);
 
 @Schema({ timestamps: true })
-export class Product extends Document {
+export class Product {
   @Prop({ required: true })
   name: string;
 
@@ -26,9 +28,6 @@ export class Product extends Document {
 
   @Prop()
   description: string;
-
-  @Prop({ default: 0 })
-  stock: number;
 
   @Prop({ type: [CommentSchema], default: [] })
   comments: Comment[];

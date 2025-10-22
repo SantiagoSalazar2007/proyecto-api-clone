@@ -1,10 +1,15 @@
-import { IsString } from 'class-validator';
+import { IsString, IsNotEmpty } from 'class-validator';
 
 export class CreateCommentDto {
   @IsString()
-  author: string;
+  @IsNotEmpty()
+  readonly userId: string; // ID del usuario 
 
   @IsString()
-  message: string;
-}
+  @IsNotEmpty()
+  readonly username: string; // nombre de usuario
 
+  @IsString()
+  @IsNotEmpty()
+  readonly content: string; // comentario
+}

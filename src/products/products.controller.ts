@@ -9,6 +9,7 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 export class ProductsController {
   constructor(private readonly service: ProductsService) {}
 
+  //se definen los endpoints usando las funciones declaradas en el service
   @Post()
   create(@Body() dto: CreateProductDto) {
     return this.service.create(dto);
