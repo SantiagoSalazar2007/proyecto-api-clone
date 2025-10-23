@@ -1,40 +1,58 @@
-import Navbar from '../../components/Navbar';
-import ProductCard from '../../components/ProductCard';
-import { useEffect, useState } from 'react';
+"use client";
+import { useEffect, useState } from "react";
 
 interface Product {
   _id: string;
   name: string;
-  price: number;
   description: string;
+  price: number;
 }
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:4000/products')
-      .then(res => res.json())
-      .then(data => setProducts(data))
-      .catch(() => console.log('Error al cargar los productos'));
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch("http://localhost:4000/products");
+        const data = await res.json();
+        setProducts(data);
+      } catch (err) {
+        console.error("Error fetching products:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
   }, []);
 
+  if (loading) return <p>Cargando productos...</p>;
+
   return (
-    <>
-      <Navbar />
-      <main style={{ padding: '2rem' }}>
-        <h1>Productos disponibles</h1>
-        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
-          {products.length > 0 ? (
-            products.map((p) => (
-              <ProductCard key={p._id} name={p.name} price={p.price} description={p.description} />
-            ))
-          ) : (
-            <p>No hay productos disponibles.</p>
-          )}
-        </div>
-      </main>
-    </>
+    <main style={{ padding: "2rem" }}>
+      <h1>Productos</h1>
+      {products.length === 0 ? (
+        <p>No hay productos disponibles.</p>
+      ) : (
+        <ul>
+          {products.map((product) => (
+            <li
+              key={product._id}
+              style={{
+                border: "1px solid #ddd",
+                borderRadius: "10px",
+                marginBottom: "10px",
+                padding: "10px",
+              }}
+            >
+              <h3>{product.name}</h3>
+              <p>{product.description}</p>
+              <strong>${product.price}</strong>
+            </li>
+          ))}
+        </ul>
+      )}
+    </main>
   );
 }
-
